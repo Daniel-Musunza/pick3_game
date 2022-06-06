@@ -9,7 +9,7 @@ pub struct Contract {
 
 #[near_bindgen]
 impl Contract {
-    // ADD CONTRACT METHODS HERE
+    // ADD CONTRACT METHODS HERE 
 }
 
 /*
