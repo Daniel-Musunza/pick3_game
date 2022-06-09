@@ -1,23 +1,13 @@
-# Rust Smart Contract Template
+# Smart Contract for Near certification
+The code for the Smart Contract is in the src lib.rs. The Smart contract is inspired by the combat example but this one prompts the Host to enter the number of participants(it loops until the last participant guesses his/her lucky number). In this Smart contract each participant is supposed to enter two lucky numbers between 1 and 9 without repeating a number e.g 12(of which interms of code it's a single two digit number). The program code generates a random number between 10 and 99 but numbers with 0(eg 20) or with repeated digits(eg 77) are not generated. if either of the participants gueses the right number he/she Wins otherwise loses.
 
-## Getting started
+The smart contracts also has tests.
 
-To get started with this template:
+## Software Required
 
-1. Click the "Use this template" button to create a new repo based on this template
-2. Update line 2 of `Cargo.toml` with your project name
-3. Update line 4 of `Cargo.toml` with your project author names
-4. Set up the [prerequisites](https://github.com/near/near-sdk-rs#pre-requisites)
-5. Begin writing your smart contract in `src/lib.rs`
-6. Test the contract 
+Rust 1.58 + cargo
+Node.js
+NEAR CLI 3.1
 
-    `cargo test -- --nocapture`
-
-8. Build the contract
-
-    `RUSTFLAGS='-C link-arg=-s' cargo build --target wasm32-unknown-unknown --release`
-
-**Get more info at:**
-
-* [Rust Smart Contract Quick Start](https://docs.near.org/docs/develop/contracts/rust/intro)
-* [Rust SDK Book](https://www.near-sdk.io/)
+## Author
+ Daniel Musunza
