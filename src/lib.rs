@@ -1,97 +1,102 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{near_bindgen, env, log};
-//use near_sdk::VMContext;
-//near_sdk::setup_alloc!();
+use near_sdk::{near_bindgen, log};
+use rand::Rng;
 
 #[near_bindgen]
 #[derive(Default, BorshDeserialize, BorshSerialize)]
-pub struct Pick2 {
-    // PICK2_GAME STATE
-val: u8,
-no_of_participants: u8,
+
+pub struct User {
+    // USER STATE
+guessnumber: u8,
 name: String,
 
+}
+
+#[near_bindgen]
+#[derive(Default, BorshDeserialize, BorshSerialize)]
+
+pub struct Pick2 {
+    // PICK2_GAME STATE
+users: Vec<User>,
+val: u8,
 }
 
 #[near_bindgen]
 impl Pick2 {
     // PICK2_GAME METHODS HERE 
 
-    pub fn parts(&mut self, no_of_participants: u8) {
 
-    //     //the host to enter number of participants(n)
-    
-   log!("Enter number of Participants");
-    self.obtain_parts();
+    //function to obtain number of participants
+    pub fn obtain_participants(&mut self) -> usize{
+       log!("Enter number of Participants");
+       return self.users.len();
+    }
 
-        
-          for _i in 1..no_of_participants{
+    //function to let participants enter their names and lucky numbers
+    pub fn add_guess (&mut self, name: String, guessnumber: u8) {
 
-         //each user to enter his/her name
-       log!("Enter your Name/ID: ");
-          self.name();
+        let names = name.clone();
+        let new_user = User {
+            name: names,
+            guessnumber: guessnumber,
+        };
 
-        //asks each user to enter his/her two lucky numbers
-         log!("Enter your two Lucky Numbers between 1 and 9. \n e.g 12\n HINT: do not repeat a number ");
-         self.obtain_no();
-         self.secret_no_generate();
-         self.guess(self.val);
+        self.users.push(new_user);
+        // log!("Enter your Name: ");
+        // return &name.to_string();
 
-            
-           
-       }
-        
-       //After all the participants guess their lucky numbers it prints the secret number
-       log!("The Lucky number is {:?}", self.secret_no_generate());
-        
-        // Reset guess number to zero.
-        self.reset();
-
-        }
-
-
-    pub fn obtain_parts(&self) -> u8 {
-        return self.no_of_participants;
-
-       }
-    pub fn name(&self) -> String{
-        return self.name.to_string();
-
-       }
-
-    pub fn obtain_no(&self) -> u8 {
-        return self.val;
+        // log!("Enter your two Lucky Numbers between 1 and 9.\n e.g 12 \n HINT: do not repeat a number ");
+        // return guessnumber.to_string();
 
     }
+
+
     //function to generate the secret number
     pub fn secret_no_generate(&mut self){
+        let mut gen_num: u8 = 0;
+        while !gen_num>10&&gen_num<99&&gen_num!=10&&gen_num!=11&&gen_num!=20&&gen_num!=22&&gen_num!=30&&gen_num!=33&&gen_num!=40&&gen_num!=44&&gen_num!=50&&gen_num!=55&&gen_num!=60&&gen_num!=66&&gen_num!=70&&gen_num!=77&&gen_num!=80&&gen_num!=88&&gen_num!=90&&gen_num!=99 {
 
-        let num= env::random_seed();
-        self.val=num[0];
+        gen_num = rand::thread_rng().gen_range(10..100);
+        };
+        self.val=gen_num;
+                
     }
-
-    //function for matching the input with the secret number
-    pub fn guess(&mut self, input: u8){
     
-        if input>10&&input<99&&input!=10&&input!=11&&input!=20&&input!=22&&input!=30&&input!=33&&input!=40&&input!=44&&input!=50&&input!=55&&input!=60&&input!=66&&input!=70&&input!=77&&input!=80&&input!=88&&input!=90&&input!=99 {
+    //function of matching the guessnumber with the secret number across each participant
+    pub fn determine_winner(&mut self){
+        //obtain_participants
+        //loop self.users ->each guess=val;
+        for i in &self.users{
+            let guessnumber = i.guessnumber;
+            let name = &i.name;
+            //checking whether the guessnumber is in [10,99] and not with 0s(eg 20) or with repeated digits(eg 77) 
+            if guessnumber>10&&guessnumber<99&&guessnumber!=10&&guessnumber!=11&&guessnumber!=20&&guessnumber!=22&&guessnumber!=30&&guessnumber!=33&&guessnumber!=40&&guessnumber!=44&&guessnumber!=50&&guessnumber!=55&&guessnumber!=60&&guessnumber!=66&&guessnumber!=70&&guessnumber!=77&&guessnumber!=80&&guessnumber!=88&&guessnumber!=90&&guessnumber!=99 {
         
-            if input==self.val{
-                log!("WON");
-                self.val =0;
+                if guessnumber==self.val{
+                    log!("{}, WON", name);
+                }else{
+                    log!("{}, LOST", name);
+                }
             }else{
-                log!("LOST");
+                log!("INVALID INPUT! (please do not repeat a digit");
             }
-        }else{
-            log!("INVALID INPUT! (please do not repeat a digit");
-        }
+    
 
+        }
+       
+        //After all the participants guess their lucky numbers it prints the secret number
+       log!("The Lucky number is {:?}", self.secret_no_generate());
+       //calls the function reset
+       self.reset();
+        
     }
+     // function to reset guess number to zero and partcipants to null
     pub fn reset(&mut self) {
         self.val = 0;
+        self.users= Vec::new();
         // Another way to log is to cast a string into bytes, hence "b" below:
         log!("Reset guess to zero"); 
     }
- 
 
 
 }
@@ -139,63 +144,59 @@ mod tests {
             epoch_height: 19,
         }
     }
-    // TESTS HERE
-    #[test]
-    fn obtain_participants(){
-         // The mock context set into the testing environment here
-         let context = get_context(vec![], false);
-         testing_env!(context);
-         // a contract variable instantiated with the counter at zero
-         //mut
-         let contract = Pick2 { no_of_participants: 5,name: "Dan".to_string(),val: 14 };
-         contract.obtain_parts();
-
-         println!("The number of participants should be: {}", contract.obtain_parts());
-         // confirming that we receive 5 after calling obtain_parts
-         assert_eq!(5, contract.obtain_parts());
-
-    }
-
-    #[test]
-    fn obtain_name(){
-
-        let context = get_context(vec![], false);
-        testing_env!(context);
-        //mut
-        let contract = Pick2 { no_of_participants: 5,name: "Dan".to_string(),val: 14 };
-        contract.name();
-
-        println!("The name should be: {}", contract.name());
+    // // TESTS HERE
     
-        assert_eq!("Dan", contract.name());
-    }
     #[test]
-    fn generate_random_and_test() {
+    //testing the add_guess function
+    fn add_guess_test() {
         
         let context = get_context(vec![], false);
         testing_env!(context);
         
-        let mut contract = Pick2 { no_of_participants: 5,name: "Dan".to_string(),val: 0};
-        contract.secret_no_generate();
-
-
-        //guessing the correct number 
-        contract.guess(contract.obtain_no());
-
-        println!("Value after guess should be 0: {}", contract.obtain_no());
+        let mut contract = Pick2 { users: Vec::new(),val: 0};
+            contract.add_guess ("name".to_string(),12);
+        
+        println!("Value after guess should be 0: {}", contract.val);
         // confirming that we receive 1 after calling obtain_no
-        assert_eq!(0, contract.obtain_no());
+        assert_eq!(1, contract.users.len());
     }
 
     #[test]
-    fn generate_random_and_reset() {
+    //testing the secret number generated
+    fn secret_no_generate_test() {
+
         let context = get_context(vec![], false);
         testing_env!(context);
-        let mut contract = Pick2 { no_of_participants: 5,name: "Dan".to_string(),val: 0};
+        let mut contract = Pick2 { users: Vec::new(),val: 0};
         contract.secret_no_generate();
+        assert_ne!(0, contract.val);
+        println!("Value generated is: {:?}", contract.secret_no_generate());
+    }
+
+    #[test]
+    //testing the reset function for users
+    fn reset_users_test() {
+        let context = get_context(vec![], false);
+        testing_env!(context);
+        let mut contract = Pick2 { users: Vec::new(),val: 0};
+        contract.add_guess ("name".to_string(),12);
+        assert_eq!(1, contract.users.len());
         contract.reset();
-        println!("Value after guess reset: {}", contract.obtain_no());
+        println!("Value after guess reset: {}", contract.val);
         // confirm that we received -1 when calling get_num
-        assert_eq!(0, contract.obtain_no());
+        assert_eq!(0, contract.users.len());
+    }
+    #[test]
+    //testing the reset function for value
+    fn reset_value_test() {
+        let context = get_context(vec![], false);
+        testing_env!(context);
+        let mut contract = Pick2 { users: Vec::new(),val: 0};
+        contract.secret_no_generate();
+        assert_ne!(0, contract.val);
+        contract.reset();
+        println!("Value after guess reset: {}", contract.val);
+        // confirm that we received -1 when calling get_num
+        assert_eq!(0, contract.val);
     }
 }
