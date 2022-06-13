@@ -1,6 +1,5 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{near_bindgen, log};
-use rand::Rng;
+use near_sdk::{near_bindgen, log, env};
 
 #[near_bindgen]
 #[derive(Default, BorshDeserialize, BorshSerialize)]
@@ -27,7 +26,7 @@ impl Pick2 {
 
 
     //function to obtain number of participants
-    pub fn obtain_participants(&mut self) -> usize{
+    pub fn obtain_participants(&self) -> usize{
        log!("Enter number of Participants");
        return self.users.len();
     }
@@ -55,8 +54,9 @@ impl Pick2 {
     pub fn secret_no_generate(&mut self){
         let mut gen_num: u8 = 0;
         while !gen_num>10&&gen_num<99&&gen_num!=10&&gen_num!=11&&gen_num!=20&&gen_num!=22&&gen_num!=30&&gen_num!=33&&gen_num!=40&&gen_num!=44&&gen_num!=50&&gen_num!=55&&gen_num!=60&&gen_num!=66&&gen_num!=70&&gen_num!=77&&gen_num!=80&&gen_num!=88&&gen_num!=90&&gen_num!=99 {
+   // Generate random number from 10 to 100 based on the above conditions
+        gen_num = *env::random_seed().get(0).unwrap()%100+10
 
-        gen_num = rand::thread_rng().gen_range(10..100);
         };
         self.val=gen_num;
                 
@@ -111,18 +111,7 @@ impl Pick2 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    //use near_sdk::MockedBlockchain;
     use near_sdk::{testing_env, VMContext};
-    //use near_sdk::test_utils::{get_logs, VMContextBuilder};
-    //use near_sdk::{testing_env, AccountId};
-
-    // part of writing unit tests is setting up a mock context
-    // provide a `predecessor` here, it'll modify the default context
-    //fn get_context(input: Vec<u8>, is_view: bool) -> VMContextBuilder {
-     //   let mut builder = VMContextBuilder::new();
-      //  builder.predecessor_account_id(input);
-        //builder
-    //}
     
     fn get_context(input: Vec<u8>, is_view: bool) -> VMContext {
         VMContext {
@@ -144,6 +133,10 @@ mod tests {
             epoch_height: 19,
         }
     }
+
+
+   
+
     // // TESTS HERE
     
     #[test]
