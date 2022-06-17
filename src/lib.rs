@@ -150,7 +150,6 @@ mod tests {
             contract.add_guess ("name".to_string(),12);
         
         println!("Value after guess should be 0: {}", contract.val);
-        // confirming that we receive 1 after calling obtain_no
         assert_eq!(1, contract.users.len());
     }
 
@@ -176,7 +175,6 @@ mod tests {
         assert_eq!(1, contract.users.len());
         contract.reset();
         println!("Value after guess reset: {}", contract.val);
-        // confirm that we received -1 when calling get_num
         assert_eq!(0, contract.users.len());
     }
     #[test]
@@ -189,7 +187,6 @@ mod tests {
         assert_ne!(0, contract.val);
         contract.reset();
         println!("Value after guess reset: {}", contract.val);
-        // confirm that we received -1 when calling get_num
         assert_eq!(0, contract.val);
     }
 }
